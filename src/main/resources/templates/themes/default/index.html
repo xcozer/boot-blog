@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:replace="themes/default/header::header(null,null)"></div>
+<body>
+<div class="main-content index-page clearfix">
+    <div class="post-lists">
+        <div class="post-lists-body">
+            <div class="post-list-item" th:each="post: ${posts.list}">
+                <div class="post-list-item-container">
+                    <a th:href="@{|/post/${post.postId}|}" class="item-thumb  bg-deepgrey"
+                       th:style="'background-image:url(' + @{/user/img/rand/3.jpg} + ');'">
+                        <dir class="item-desc" th:text="${post.tags}"></dir>
+                    </a>
+                    <div class="item-slant reverse-slant &lt; bg-deepgrey"></div>
+                    <div class="item-slant"></div>
+                    <div class="item-label">
+                        <div class="item-title"><a th:href="@{'/post/' + ${post.postId}}" th:text="${post.title}"></a>
+                        </div>
+                        <div class="item-meta clearfix">
+                            <div class="item-meta-ico bg-ico-book"
+                                 th:style="'background: url(' + @{/user/img/bg-ico.png} + ');no-repeat;background-size: 40px auto;'"></div>
+                            <div class="item-meta-cat" th:utext="${post.categories}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="lists-navigator clearfix">
+        <div th:replace="comm/macros::pageNav(${posts},'←','→','page')"></div>
+    </div>
+</div>
+</body>
+<div th:replace="themes/default/footer::footer"></div>
+</html>

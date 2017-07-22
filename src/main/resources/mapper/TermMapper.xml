@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcozer.blog.repo.TermRepository">
+    <resultMap id="term" type="com.xcozer.blog.entity.Term">
+        <id property="termId" column="term_id" javaType="Integer" jdbcType="INTEGER"/>
+        <result property="taxonomyId" column="term_taxonomy_id" javaType="Integer" jdbcType="INTEGER"/>
+        <result property="name" column="name" javaType="string" jdbcType="VARCHAR"/>
+        <result property="slug" column="slug" javaType="string" jdbcType="VARCHAR"/>
+        <result property="count" column="count" javaType="Integer" jdbcType="INTEGER"/>
+        <result property="taxonomy" column="taxonomy" javaType="string" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <update id="updateTerm" parameterType="com.xcozer.blog.entity.Term">
+        UPDATE terms
+        SET name = #{name}, slug = #{slug}
+        WHERE term_id = #{termId}
+    </update>
+
+    <delete id="delTerm">
+        DELETE terms, term_taxonomy
+        <if test="cascade == true">
+            , term_relationships
+        </if>
+        FROM terms, term_taxonomy
+        <if test="cascade == true">
+            , term_relationships
+        </if>
+        WHERE terms.term_id = term_taxonomy.term_id
+        <if test="cascade == true">
+            AND term_taxonomy.term_taxonomy_id = term_relationships.taxonomy_id
+        </if>
+        AND terms.term_id = #{termId}
+    </delete>
+
+    <delete id="delTermRelationShip">
+        DELETE FROM term_relationships
+        WHERE object_id = #{postId}
+    </delete>
+
+    <select id="findAllTerms" resultMap="term" parameterType="string">
+        SELECT
+            terms.term_id AS term_id,
+            term_taxonomy_id,
+            name,
+            slug,
+            count,
+            taxonomy
+        FROM term_taxonomy, terms
+        WHERE taxonomy = #{type} AND term_taxonomy.term_id = terms.term_id
+    </select>
+
+    <select id="findAllTermsWithPost" resultType="com.xcozer.blog.entity.Term">
+        SELECT
+        t.term_id AS term_id,
+        t.slug AS slug,
+        tt.taxonomy AS taxonomy,
+        tt.term_taxonomy_id AS taxonomyId,
+        tt.count AS count,
+        t.name AS name
+        FROM terms t, term_taxonomy tt, term_relationships tr
+        <where>
+            <if test="true">
+                tr.object_id = #{postId} AND tr.taxonomy_id = tt.term_taxonomy_id AND
+                tt.term_id = t.term_id
+            </if>
+            <if test="taxonomy != null">
+                AND tt.taxonomy = #{taxonomy}
+            </if>
+        </where>
+    </select>
+
+    <select id="findTermByName" resultType="Integer">
+        SELECT term_id
+        FROM terms
+        WHERE name = #{name}
+    </select>
+
+    <select id="findTaxonomyByTermName" resultType="Integer">
+        SELECT term_taxonomy_id
+        FROM term_taxonomy tt, terms t
+        WHERE t.name = #{name} AND t.term_id = tt.term_id
+    </select>
+
+    <select id="findTermById" resultType="com.xcozer.blog.entity.Term">
+        SELECT
+            t.term_id           AS term_id,
+            t.slug              AS slug,
+            tt.taxonomy         AS taxonomy,
+            tt.term_taxonomy_id AS taxonomyId,
+            tt.count            AS count,
+            t.name              AS name
+        FROM terms t, term_taxonomy tt
+        WHERE t.term_id = #{termId} AND t.term_id = tt.term_id
+    </select>
+
+    <insert id="addTerm" parameterType="com.xcozer.blog.entity.Term">
+        <selectKey resultType="Integer" order="AFTER" keyProperty="termId">
+            SELECT last_insert_id()
+        </selectKey>
+        INSERT IGNORE INTO terms
+        SET name = #{name}, slug = #{slug}
+    </insert>
+
+    <insert id="addTermForTaxonomy">
+        <selectKey resultType="Integer" order="AFTER" keyProperty="taxonomyId">
+            SELECT last_insert_id()
+        </selectKey>
+        INSERT IGNORE INTO term_taxonomy
+        SET term_id = #{termId}, taxonomy = #{taxonomy}, count = 0
+    </insert>
+
+    <insert id="addTermRelationship">
+        INSERT IGNORE INTO term_relationships (object_id, taxonomy_id) VALUES (#{postId}, #{taxonomyId})
+    </insert>
+
+    <update id="updateTermCount">
+        UPDATE term_taxonomy
+        <choose>
+            <when test="num > 0">
+                SET count = count + 1
+            </when>
+            <otherwise>
+                SET count = count -1
+            </otherwise>
+        </choose>
+        WHERE term_taxonomy_id = #{taxonomyId}
+    </update>
+
+    <update id="reduceTermCount">
+        UPDATE term_taxonomy
+        SET count = count - 1
+        WHERE term_taxonomy_id IN (SELECT taxonomy_id
+                                   FROM term_relationships
+                                   WHERE object_id = #{postId})
+    </update>
+</mapper>

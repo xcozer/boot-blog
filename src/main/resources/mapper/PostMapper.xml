@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xcozer.blog.repo.PostRepository">
+    <resultMap id="BaseResult" type="com.xcozer.blog.entity.Post">
+        <id property="postId" column="post_id" javaType="int" jdbcType="INTEGER"/>
+        <result property="title" column="title" javaType="string" jdbcType="VARCHAR"/>
+        <result property="slug" column="slug" javaType="string" jdbcType="VARCHAR"/>
+        <result property="content" column="content" javaType="string" jdbcType="LONGVARCHAR"/>
+        <result property="hits" column="hits" javaType="integer" jdbcType="INTEGER"/>
+        <result property="allowComment" column="allow_comment" javaType="boolean" jdbcType="BIT"/>
+        <result property="commentCount" column="comment_count" javaType="int" jdbcType="INTEGER"/>
+        <result property="created" column="created" javaType="Date" jdbcType="TIMESTAMP"/>
+        <result property="modified" column="modified" javaType="Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="BaseColumnList">
+        post_id, title, slug, content, hits, allow_comment, comment_count, created, modified
+    </sql>
+
+    <insert id="save" parameterType="com.xcozer.blog.entity.Post">
+        <selectKey resultType="Integer" order="AFTER" keyProperty="postId">
+            SELECT last_insert_id()
+        </selectKey>
+        INSERT INTO posts SET
+        <trim suffixOverrides=",">
+            <if test="postId != null">
+                post_id = #{postId},
+            </if>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="slug != null">
+                slug = #{slug},
+            </if>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            <if test="hits != null">
+                hits = #{hits},
+            </if>
+            <if test="allowComment != null">
+                allow_comment = #{allowComment},
+            </if>
+            <if test="commentCount != null">
+                comment_count = #{commentCount},
+            </if>
+            <if test="created == null">
+                created = now(),
+            </if>
+            <if test="modified == null">
+                modified = now()
+            </if>
+        </trim>
+        ON DUPLICATE KEY UPDATE
+        <trim suffixOverrides=",">
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="slug != null">
+                slug = #{slug},
+            </if>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            <if test="hits != null">
+                hits = #{hits},
+            </if>
+            <if test="allowComment != null">
+                allow_comment = #{allowComment},
+            </if>
+            <if test="commentCount != null">
+                comment_count = #{commentCount},
+            </if>
+            <if test="true">
+                modified = now()
+            </if>
+        </trim>
+    </insert>
+
+    <delete id="delete">
+        DELETE posts, term_relationships FROM posts, term_relationships
+        WHERE post_id = #{postId} AND object_id = #{postId}
+    </delete>
+
+    <select id="findAllPosts" resultMap="BaseResult" parameterType="boolean">
+        SELECT
+        post_id,
+        title,
+        slug,
+        <choose>
+            <when test="_parameter">
+                content
+            </when>
+        </choose>
+        hits,
+        allow_comment,
+        comment_count,
+        created,
+        modified
+        FROM posts
+    </select>
+
+    <select id="findPostById" resultMap="BaseResult" parameterType="Integer">
+        select
+        <include refid="BaseColumnList"/>
+        from posts WHERE post_id = #{id}
+    </select>
+
+    <select id="countPosts" resultType="com.xcozer.blog.entity.Statistic">
+        SELECT count(post_id) AS postCount
+        FROM posts
+    </select>
+</mapper>

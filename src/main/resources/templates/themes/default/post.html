@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:replace="themes/default/header::header(${post.title},null)"></div>
+<body>
+<article class="main-content post-page" itemscope="" itemtype="http://schema.org/Article">
+    <div class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+            <a th:href="@{|/post/${post.postId}|}" th:text="${post.title}" data-no-instant=""></a>
+        </h1>
+        <div class="post-data">
+            <time th:datetime="${#dates.format(post.created, 'yyyy-MM-dd HH:mm')}" itemprop="datePublished"
+                  th:text="'发布于 '+ ${#dates.format(post.created, 'yyyy-MM-dd HH:mm')}"></time>
+            /
+            <th:block th:utext="${renderedCategories}"/>
+            / <a href="#comments" th:text="'0 条评论'"></a> /
+            <!--/ <a href="#comments" th:text="${article.commentsNum ?: 0}+' 条评论'"></a> /-->
+            <th:block th:text="${post.hits}"/>
+            浏览
+        </div>
+    </div>
+    <div id="post-content" class="post-content" itemprop="articleBody">
+        <p class="post-tags" th:utext="${renderedTags}"></p>
+        <th:block th:utext="${post.content}"/>
+        <p class="post-info">
+            本站文章除注明转载/出处外，均为本站原创或翻译，转载前请务必署名,转载请标明出处<br/>最后编辑时间为:
+            <th:block th:text="${#dates.format(post.modified, 'yyyy-MM-dd HH:mm:ss')}"/>
+        </p>
+    </div>
+</article>
+<!--<div th:replace="themes/default/comments::comments"></div>-->
+<div th:replace="themes/default/footer::footer"></div>
+</body>
+</html>

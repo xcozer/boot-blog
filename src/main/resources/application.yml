@@ -1,0 +1,28 @@
+server:
+  port: 8081
+spring:
+  redis:
+    host: 192.168.50.119
+  thymeleaf:
+    mode: HTML5
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+  devtools:
+    livereload:
+      enabled: false
+  cache:
+    type: redis
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    use-column-label: true
+    default-statement-timeout: 3000
+
+---
+
+spring:
+  profiles: dev
+  cache:
+    type: simple
