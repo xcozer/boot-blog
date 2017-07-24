@@ -45,17 +45,6 @@ public class BlogApplication {
         return template;
     }
 
-    @Bean(name = "hits")
-    public RedisTemplate<String, Integer> redisTemplate1(RedisConnectionFactory factory) {
-        RedisTemplate<String, Integer> template = new RedisTemplate<>();
-        template.setConnectionFactory(factory);
-        template.setKeySerializer(new StringRedisSerializer(Charset.forName("UTF-8")));
-        template.setValueSerializer(new GenericToStringSerializer<>(Integer.class));
-        template.afterPropertiesSet();
-
-        return template;
-    }
-
     @Bean
     public Interceptor pageHelper() {
         PageHelper pageHelper = new PageHelper();

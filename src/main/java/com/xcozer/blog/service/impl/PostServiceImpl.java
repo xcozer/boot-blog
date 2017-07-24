@@ -16,6 +16,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,10 +37,10 @@ public class PostServiceImpl implements PostService {
 
     private final TermRepository termRepository;
 
-    private final RedisTemplate<String, Integer> redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
     @Autowired
-    public PostServiceImpl(PostRepository postRepository, TermRepository termRepository, @Qualifier("hits") RedisTemplate<String, Integer> redisTemplate) {
+    public PostServiceImpl(PostRepository postRepository, TermRepository termRepository, StringRedisTemplate redisTemplate) {
         this.postRepository = postRepository;
         this.termRepository = termRepository;
         this.redisTemplate = redisTemplate;
@@ -57,11 +58,11 @@ public class PostServiceImpl implements PostService {
     @Cacheable(key = "'post-' + #id")
     public Post findPostById(Integer id) {
         Post post = postRepository.findPostById(id);
-        Integer hits = redisTemplate.opsForValue().get("post-" + id + "-hits");
+        String hits = redisTemplate.opsForValue().get("post-" + id + "-hits");
         if (Objects.nonNull(hits)) {
-            post.setHits(hits);
+            post.setHits(Integer.parseInt(hits));
         } else {
-            redisTemplate.opsForValue().set("post-" + id + "-hits", post.getHits());
+            redisTemplate.opsForValue().set("post-" + id + "-hits", post.getHits().toString());
         }
 
         return post;
@@ -110,7 +111,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public int getHits(int postId) {
-        return redisTemplate.opsForValue().get("post-" + postId + "-hits");
+        return Integer.parseInt(redisTemplate.opsForValue().get("post-" + postId + "-hits"));
     }
 
     @Override

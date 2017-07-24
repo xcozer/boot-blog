@@ -1,10 +1,8 @@
 server:
   port: 8081
 spring:
-  redis:
-    host: 192.168.50.119
   thymeleaf:
-    mode: HTML5
+    mode: LEGACYHTML5
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
