@@ -117,14 +117,16 @@
 
     <update id="updateTermCount">
         UPDATE term_taxonomy
-        <choose>
-            <when test="num > 0">
-                SET count = count + 1
-            </when>
-            <otherwise>
-                SET count = count -1
-            </otherwise>
-        </choose>
+        <set>
+            <choose>
+                <when test="num > 0">
+                    count = count + 1
+                </when>
+                <otherwise>
+                    count = count -1
+                </otherwise>
+            </choose>
+        </set>
         WHERE term_taxonomy_id = #{taxonomyId}
     </update>
 
