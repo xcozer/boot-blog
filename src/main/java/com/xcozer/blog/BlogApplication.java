@@ -44,14 +44,4 @@ public class BlogApplication {
 
         return template;
     }
-
-    @Bean
-    public Interceptor pageHelper() {
-        PageHelper pageHelper = new PageHelper();
-        Properties properties = new Properties();
-        properties.setProperty("dialect", "mysql");
-        pageHelper.setProperties(properties);
-
-        return pageHelper;
-    }
 }

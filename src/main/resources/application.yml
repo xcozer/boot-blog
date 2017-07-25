@@ -17,6 +17,8 @@ mybatis:
     map-underscore-to-camel-case: true
     use-column-label: true
     default-statement-timeout: 3000
+pagehelper:
+  dialect: mysql
 
 ---
 
